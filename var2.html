@@ -5,77 +5,95 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="ie=edge">
 <title>Скачать CSV</title>
+<link rel="stylesheet" href="./style.css">
 <style>
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(4, 50px);
-      gap: 10px;
-    }
-    .grid-item {
-      width: 50px;
-      height: 50px;
-      background-color: #ddd;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-    .selected {
-      background-color: #aaf;
-    }
-  </style>
-  </head>
-  <body>
-  
-  <h2>Выберите точки и укажите координаты</h2>
-  <div id="grid" class="grid">
-    <!-- Точки будут добавлены здесь -->
-  </div>
-  
-  <p>Введите размер поля (например, 5x4): <input type="text" id="gridSize" value="5x4"></p>
-  <button onclick="createGrid()">Создать поле</button>
-  <button onclick="downloadCSV()">Скачать CSV</button>
-  
-  <script>
-  let selectedPoints = [];
-  
-  function createGrid() {
-    const grid = document.getElementById('grid');
-    grid.innerHTML = ''; // Очистить предыдущее поле
-    const size = document.getElementById('gridSize').value.split('x');
-    const rows = parseInt(size[0]);
-    const cols = parseInt(size[1]);
-  
-    for (let i = 0; i < rows * cols; i++) {
-      const div = document.createElement('div');
-      div.className = 'grid-item';
-      div.onclick = function() { selectPoint(i + 1, div); };
-      grid.appendChild(div);
-    }
+  .grid {
+    display: grid;
+    gap: 10px;
   }
-  
-  function selectPoint(index, element) {
-    const x = prompt('Введите координату X для точки ' + index + ' в см:');
-    const y = prompt('Введите координату Y для точки ' + index + ' в см:');
-    if (x && y) {
-      selectedPoints.push({ index, x, y });
-      element.classList.add('selected');
-    }
+  .grid-item {
+    width: 50px; /* Измените ширину, если нужно */
+    height: 50px; /* Измените высоту, если нужно */
+    background-color: #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
   }
-  
-  function downloadCSV() {
-    const csvContent = 'data:text/csv;charset=utf-8,'
-      + selectedPoints.map(p => `${p.index},${p.x},${p.y}`).join('\\r\\n');
-  
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', 'selected_points.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  .coordinate {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    font-size: 10px;
   }
-  </script>
+</style>
+</head>
+<body>
+
+    <nav>
+        <a href="/var1.html">Другой вариант</a>
+    </nav>
+
+<h2>Введите размеры поля и координаты точек</h2>
+<p>Количество рядов: <input type="number" id="rows" value="5"></p>
+<p>Количество точек в ряду: <input type="number" id="cols" value="4"></p>
+<p>Ширина поля в см: <input type="number" id="width" value="200"></p>
+<p>Высота поля в см: <input type="number" id="height" value="100"></p>
+<button onclick="createGrid()">Создать поле</button>
+<div id="grid" class="grid">
+  <!-- Точки будут добавлены здесь -->
+</div>
+<button onclick="downloadCSV()">Скачать CSV</button>
+
+<script>
+let selectedPoints = [];
+
+function createGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = ''; // Очистить предыдущее поле
+  const rows = document.getElementById('rows').value;
+  const cols = document.getElementById('cols').value;
+  const width = document.getElementById('width').value;
+  const height = document.getElementById('height').value;
+  grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  grid.style.width = `${width}cm`;
+  grid.style.height = `${height}cm`;
+
+  for (let i = 0; i < rows * cols; i++) {
+    const div = document.createElement('div');
+    div.className = 'grid-item';
+    div.onclick = function() { selectPoint(i + 1, div); };
+    grid.appendChild(div);
+  }
+}
+
+function selectPoint(index, element) {
+  const coordinates = prompt('Введите координаты X и Y для точки ' + index + ' в см (формат: x,y):');
+  if (coordinates) {
+    const [x, y] = coordinates.split(',');
+    selectedPoints.push({ index, x, y });
+    element.classList.add('selected');
+    const span = document.createElement('span');
+    span.className = 'coordinate';
+    span.textContent = `(${x},${y})`;
+    element.appendChild(span);
+  }
+}
+
+function downloadCSV() {
+  const csvContent = 'data:text/csv;charset=utf-8,'
+    + selectedPoints.map(p => `${p.index},${p.x},${p.y}`).join('\\r\\n');
+
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement('a');
+  link.setAttribute('href', encodedUri);
+  link.setAttribute('download', 'selected_points.csv');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+</script>
 
 </body>
 </html>
